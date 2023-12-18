@@ -42,3 +42,6 @@ const patientDetails = new mongoose.Schema ({
         required: true,
     }
 });
+
+const Patient = mongoose.model('Patient', patientSchema);
+module.exports = Patient;
