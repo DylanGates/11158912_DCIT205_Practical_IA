@@ -1,21 +1,10 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const Patient = require('./Patient'); 
+
+const Patient = require('./api/Patient'); 
 
 const app = express();
 
-mongoose
-    .connect("mongodb://localhost/27017", {useNewURLParser: true})
-    .then(() => {
-        try {
-            console.log("Connected to Database.");
-        } catch (err) {
-            console.log(err);
-        }
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+
 
 
 app.post('/Patient', (req, res) => {
@@ -31,7 +20,8 @@ app.post('/Patient', (req, res) => {
     });
 });
 
-app.post('/Patient/:id/encounter', (req, res) => {
+
+app.post('/api/patients/:id/encounter', (req, res) => {
     const patientID = req.params.id;
     const { vitals } = req.body;
 
@@ -45,10 +35,33 @@ app.post('/Patient/:id/encounter', (req, res) => {
     .catch((error) => {
         res.status(500).json(error);
 
-    res.status(500).json({ error: 'Error has occured'})
-    })
-})
+    res.status(500).json({ error: 'Error has occured'});
+    });
+});
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000.');
+
+app.get('/api/patients', (req, res) => {
+    Patient.find()
+    .then((patients) => {
+        res.json(patients);
+    })
+    .catch((err) => {
+        res.status(500).json(err);
+    });
+
+});
+
+app.get('/api/patients/:id', (req, res) => {
+    const patientID = req.params.id;
+
+    Patient.findById(patientID)
+    .then((patient) => {
+        if (!patient) {
+            return res.status(404).json({ error: 'Patient not found'});
+        }
+        res.join(patient);
+    })
+    .catch((error) => {
+        res.status(500).json(error);
+    });
 });
